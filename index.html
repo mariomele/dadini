@@ -343,7 +343,7 @@ input:focus-visible,button:focus-visible,a:focus-visible{outline:3px solid #2B4D
           <div style="display: flex; flex-direction: column; gap: 22px">
             <div>
               <p class="lbl">Materiale</p>
-              <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px">
+              <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px">
                 <sc-for list="{{bases}}" as="ba" hint-placeholder-count="3">
                   <button type="button" class="bcard {{ba.on}}" onClick="{{ba.pick}}">
                     <span class="bcard-v" style="background: {{ba.vis}}"></span>
@@ -543,7 +543,7 @@ input:focus-visible,button:focus-visible,a:focus-visible{outline:3px solid #2B4D
       <div class="reveal" style="border: 2px solid rgba(250,246,239,.25); border-radius: 28px; padding: 28px; display: flex; flex-direction: column; gap: 14px; min-height: 250px">
         <span class="serif" style="font-size: 72px; font-style: italic; line-height: 1; color: #AEC9E6">1</span>
         <h3 style="margin: 0; font-size: 22px">Scegli la base</h3>
-        <p style="margin: 0; color: #C9CFD8; line-height: 1.5">Corda in cotone, cotone cerato o maglia Snake, in acciaio o oro 18k: il gioiello comincia da te.</p>
+        <p style="margin: 0; color: #C9CFD8; line-height: 1.5">Corda o maglia Snake, in acciaio o oro 18k: il gioiello comincia da te.</p>
       </div>
       <div class="reveal" style="border: 2px solid rgba(250,246,239,.25); border-radius: 28px; padding: 28px; display: flex; flex-direction: column; gap: 14px; min-height: 250px">
         <span class="serif" style="font-size: 72px; font-style: italic; line-height: 1; color: #AEC9E6">2</span>
@@ -616,7 +616,6 @@ input:focus-visible,button:focus-visible,a:focus-visible{outline:3px solid #2B4D
       <p class="mono" style="margin: 0; font-size: 13px">Le basi</p>
       <ul style="list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; font-size: 16px">
         <li style="display: flex; justify-content: space-between; gap: 10px; border-bottom: 1.5px solid rgba(22,33,46,.12); padding-bottom: 10px"><span>Bracciale in Corda</span><strong>10,00 €</strong></li>
-        <li style="display: flex; justify-content: space-between; gap: 10px; border-bottom: 1.5px solid rgba(22,33,46,.12); padding-bottom: 10px"><span>Cotone cerato doppio giro</span><strong>11,00 €</strong></li>
         <li style="display: flex; justify-content: space-between; gap: 10px; border-bottom: 1.5px solid rgba(22,33,46,.12); padding-bottom: 10px"><span>Snake Acciaio · 18 cm</span><strong>29,00 €</strong></li>
         <li style="display: flex; justify-content: space-between; gap: 10px"><span>Snake Oro 18kr · 16 cm</span><strong>34,00 €</strong></li>
       </ul>
@@ -1307,7 +1306,6 @@ class Component extends DCLogic {
   baseInfo() {
     var st = this.state, metal = METALS[st.metal], cord = find(CORDS, st.cord);
     if (st.base === 'snake') return { name: st.metal === 'oro' ? 'Base Bracciale Snake · Oro 18kt · 16 cm' : 'Base Bracciale Snake · Acciaio · 18 cm', price: st.metal === 'oro' ? 34 : 29 };
-    if (st.base === 'cotone') return { name: 'Base Cotone Cerato Blue doppio giro', price: 11 };
     return { name: 'Bracciale in Corda · ' + cord.name + ' · ' + metal.name, price: 10 };
   }
   orderData() {
@@ -1480,7 +1478,6 @@ class Component extends DCLogic {
       goStep3: function () { self.setState({ step: 3 }); },
       bases: [
         { id: 'corda', name: 'Corda', desc: 'Intrecciata, 6 colori', from: 'da 10 €', vis: 'linear-gradient(135deg, ' + cord.hex + ', #EEF4FA)' },
-        { id: 'cotone', name: 'Cotone cerato', desc: 'Doppio giro, colore a scelta', from: 'da 11 €', vis: 'linear-gradient(135deg, ' + cord.hex + ', #EEF4FA)' },
         { id: 'snake', name: 'Snake', desc: 'Maglia metallica', from: 'da 29 €', vis: 'linear-gradient(135deg, ' + METALS[st.metal].hex + ', #FFFFFF)' }
       ].map(function (b) {
         return { name: b.name, desc: b.desc, from: b.from, vis: b.vis, on: b.id === st.base ? 'bcard-on' : '', pick: function () { self.setState({ base: b.id }); } };
