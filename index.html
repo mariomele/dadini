@@ -432,9 +432,9 @@ input:focus-visible,button:focus-visible,a:focus-visible{outline:3px solid #2B4D
             <div class="mrow">
               <span class="ti-b" style="background: {{metalChip}}; flex: 0 0 auto"></span>
               <span style="flex: 1; min-width: 0"><strong>{{beadName}}</strong><br><span class="mono" style="font-size: 11px; color: #4A5462">{{beadPriceNote}}</span></span>
-              <button type="button" class="round round-sm" onClick="{{beadMinus}}" disabled="{{noBeadMinus}}" aria-label="Meno Beads">−</button>
+              <button type="button" class="round round-sm" onClick="{{beadMinus}}" disabled="{{noBeadMinus}}" aria-label="Meno 5 Beads">−5</button>
               <strong class="mnum">{{nBead}}</strong>
-              <button type="button" class="round round-sm" onClick="{{beadPlus}}" disabled="{{noMetalPlus}}" aria-label="Più Beads">+</button>
+              <button type="button" class="round round-sm" onClick="{{beadPlus}}" disabled="{{noBeadPlus}}" aria-label="Più 5 Beads">+5</button>
             </div>
             <div>
               <p class="lbl">Riordina in un tocco</p>
@@ -451,7 +451,7 @@ input:focus-visible,button:focus-visible,a:focus-visible{outline:3px solid #2B4D
             <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 12px 14px; border-radius: 16px; background: #EEF4FA">
               <span style="font-size: 14px; margin-right: auto">Inserisci subito dopo il pezzo selezionato:</span>
               <button type="button" class="pill" onClick="{{insStop}}" disabled="{{noMetalPlus}}">+ Stop!</button>
-              <button type="button" class="pill" onClick="{{insBead}}" disabled="{{noMetalPlus}}">+ Bead</button>
+              <button type="button" class="pill" onClick="{{insBead}}">+ 5 Beads</button>
             </div>
             <button type="button" class="btn btn-line" style="min-height: 46px; align-self: flex-start" onClick="{{goStep2}}">← Dadini</button>
           </div>
@@ -858,7 +858,7 @@ class Component extends DCLogic {
     try { reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) {}
     this.state = {
       base: 'corda', cord: 'azzurro', metal: 'oro',
-      seq: [{ t: 'bead' }, { t: 'stop' }, { t: 'd', k: 'med:limoncello' }, { t: 'bead' }, { t: 'd', k: 'ama:positano' }, { t: 'bead' }, { t: 'd', k: 'med:born' }, { t: 'stop' }, { t: 'bead' }],
+      seq: [{ t: 'bead' }, { t: 'bead' }, { t: 'stop' }, { t: 'd', k: 'med:limoncello' }, { t: 'bead' }, { t: 'd', k: 'ama:positano' }, { t: 'bead' }, { t: 'd', k: 'med:born' }, { t: 'stop' }, { t: 'bead' }],
       active: 2, coll: 'med', mode: 'bracelet', face: 'front', zoom: 1, step: 1, prev: null,
       auto: props.autoRotate !== false && !reduce,
       gtab: 'med', flipped: {}, cart: 0, added: false, subscribed: false, noWebgl: true,
@@ -1273,7 +1273,20 @@ class Component extends DCLogic {
     s.splice(at, 0, item); this.setSeq(s, at);
   }
   addDadinoKey(key) { if (this.canAddItem(true)) this.insertAfterActive({ t: 'd', k: key }); }
-  addMetal(t) { if (this.canAddItem(false)) this.insertAfterActive({ t: t }); }
+  addMetal(t) {
+    if (t === 'bead') { this.addBeadSet(); return; }
+    if (this.canAddItem(false)) this.insertAfterActive({ t: t });
+  }
+  addBeadSet() {
+    var s = this.state.seq.slice(), at = Math.min(this.state.active + 1, s.length);
+    s.splice(at, 0, { t: 'bead' }, { t: 'bead' }, { t: 'bead' }, { t: 'bead' }, { t: 'bead' });
+    this.setSeq(s, at + 4);
+  }
+  removeBeadSet() {
+    var s = this.state.seq.slice(), n = 0;
+    for (var i = s.length - 1; i >= 0 && n < 5; i--) if (s[i].t === 'bead') { s.splice(i, 1); n++; }
+    if (n && s.length) this.setSeq(s, Math.min(this.state.active, s.length - 1));
+  }
   removeActive() {
     var s = this.state.seq.slice(), i = this.state.active;
     if (s.length <= 1) return;
@@ -1318,7 +1331,7 @@ class Component extends DCLogic {
     seq.forEach(function (x) { if (x.t === 'd') { if (!counts[x.k]) order.push(x.k); counts[x.k] = (counts[x.k] || 0) + 1; } });
     order.forEach(function (key) { var d = dadino(key), c = counts[key]; items.push({ label: (c > 1 ? c + ' × ' : '') + d.name, price: eur(d.price * c) }); total += d.price * c; });
     if (nStop) { items.push({ label: nStop + ' × ' + stopName, price: eur(5 * nStop) }); total += 5 * nStop; }
-    if (nBead) { items.push({ label: sets + ' × Set 5 Beads ' + (st.metal === 'oro' ? 'Oro 18 kt' : 'Acciaio') + ' (' + nBead + ' usati)', price: eur(setP * sets) }); total += setP * sets; }
+    if (nBead) { items.push({ label: sets + ' × Set 5 Beads ' + (st.metal === 'oro' ? 'Oro 18 kt' : 'Acciaio') + ' (' + nBead + ' Beads)', price: eur(setP * sets) }); total += setP * sets; }
     var rows = seq.map(function (x, i) {
       var d = x.t === 'd' ? dadino(x.k) : null;
       return {
@@ -1553,9 +1566,10 @@ class Component extends DCLogic {
       stopPlus: function () { self.addMetal('stop'); },
       noStopMinus: nStop === 0,
       noMetalPlus: noAddAny,
+      noBeadPlus: false,
       beadName: 'Beads ' + metal.name,
-      beadPriceNote: eur(od.setP) + ' a set di 5 · ' + nBead + ' usati',
-      beadMinus: function () { self.removeLastOf('bead'); },
+      beadPriceNote: 'Kit da 5 · ' + eur(od.setP) + ' a kit · ' + nBead + ' nel bracciale',
+      beadMinus: function () { self.removeBeadSet(); },
       beadPlus: function () { self.addMetal('bead'); },
       noBeadMinus: nBead === 0,
       layouts: [
